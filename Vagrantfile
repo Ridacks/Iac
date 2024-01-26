@@ -82,6 +82,23 @@ Vagrant.configure("2") do |config|
         end
         config.vm.provision "shell", path: "config_sshd.sh"
         config.vm.provision "shell", path: "install_postgres.sh"
-    end  
+    end
+
+    # Serveur registre Docker
+    config.vm.define "registry" do |registry|
+        registry.vm.box = "debian/bookworm64"
+        registry.vm.hostname = "registry"
+        registry.vm.box_url = "debian/bookworm64"
+        registry.vm.network :private_network, ip: "192.168.10.5"
+        registry.vm.provider :virtualbox do |v|
+            v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+            v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+            v.customize ["modifyvm", :id, "--memory", 512]
+            v.customize ["modifyvm", :id, "--name", "registry"]
+            v.customize ["modifyvm", :id, "--cpus", "1"]
+        end
+        config.vm.provision "shell", path: "config_sshd.sh"
+        config.vm.provision "shell", path: "install_registry.sh"
+    end
 
 end
